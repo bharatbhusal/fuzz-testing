@@ -12,6 +12,9 @@ contract VotingSystemTest is Test {
     address user3;
     address[] public constructorParams;
 
+    /**
+     * @dev Set up function to initialize test environment
+     */
     function setUp() public {
         votingSystem = new VotingSystem(constructorParams);
         user1 = makeAddr("user1");
@@ -19,12 +22,19 @@ contract VotingSystemTest is Test {
         user3 = makeAddr("user3");
     }
 
+    /**
+     * @dev Test function to add a new candidate
+     * @param newCandidate Address of the new candidate to be added
+     */
     function test_addCandidate(address newCandidate) public {
         votingSystem.addCandidate(newCandidate);
         assert(votingSystem.getCandidates()[0] == newCandidate);
     }
 
-    function test_getCandidate() public {
+    /**
+     * @dev Test function to get the list of all candidates
+     */
+    function test_getCandidates() public {
         votingSystem.addCandidate(makeAddr("me"));
         votingSystem.addCandidate(makeAddr("you"));
         votingSystem.addCandidate(makeAddr("and"));
@@ -36,16 +46,27 @@ contract VotingSystemTest is Test {
         assert(votingSystem.getCandidates()[4] == makeAddr("are"));
     }
 
+    /**
+     * @dev Test function to check if a voter has not voted
+     * @param voter Address of the voter
+     */
     function test_hasNotVoted(address voter) public view {
         assert(votingSystem.hasVoted(voter) == false);
     }
 
+    /**
+     * @dev Test function to check if a voter has voted
+     */
     function test_hasVoted() public {
         votingSystem.addCandidate(makeAddr("are"));
         votingSystem.vote(0);
         assert(votingSystem.hasVoted(address(this)) == true);
     }
 
+    /**
+     * @dev Test function to vote for a candidate
+     * @param candidateIndex Index of the candidate being voted for
+     */
     function test_vote(uint256 candidateIndex) public {
         votingSystem.addCandidate(makeAddr("me"));
         votingSystem.addCandidate(makeAddr("you"));
@@ -57,10 +78,33 @@ contract VotingSystemTest is Test {
         assert(votingSystem.getTotalVotes(candidateIndex) == 1);
     }
 
-    // function test_getTotalVotes() public {
-    //     votingSystem.addCandidate(makeAddr("are"));
-    //     (user1, ) = makeAddrAndKey("user1");
+    /**
+     * @dev Test function to get the total votes received by a candidate
+     */
+    function test_getTotalVotes() public {
+        votingSystem.addCandidate(makeAddr("are"));
+        user1 = makeAddr("user1");
+        vm.startPrank(user1);
+        votingSystem.vote(0);
+        vm.stopPrank();
 
-    //     user1.vote(0);
-    // }
+        user2 = makeAddr("user2");
+        vm.startPrank(user2);
+        votingSystem.vote(0);
+        vm.stopPrank();
+
+        assert(votingSystem.getTotalVotes(0) == 2);
+    }
+
+    /**
+     * @dev Test function to remove a candidate
+     * @param candidateIndex Index of the candidate to be removed
+     */
+    function test_removeCandidate(uint256 candidateIndex) public {
+        votingSystem.addCandidate(makeAddr("are"));
+        assert(votingSystem.getCandidates()[0] == makeAddr("are"));
+        vm.assume(candidateIndex <= votingSystem.getCandidates().length - 1);
+        votingSystem.removeCandidate(candidateIndex);
+        assert(votingSystem.getCandidates()[0] != makeAddr("are"));
+    }
 }

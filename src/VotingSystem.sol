@@ -49,6 +49,7 @@ contract VotingSystem {
         _;
     }
 
+    // Modifier to ensure that the new candidate being added is not a duplicate
     modifier duplicateNewCandidate(address newCandidate) {
         for (uint i = 0; i < candidates.length; i++) {
             require(newCandidate != candidates[i], "Candidate already exists");
@@ -57,13 +58,19 @@ contract VotingSystem {
         _;
     }
 
-    // Constructor to initialize the contract with candidate addresses
+    /**
+     * @dev Constructor to initialize the contract with candidate addresses
+     * @param _candidates Array of initial candidate addresses
+     */
     constructor(address[] memory _candidates) {
         owner = msg.sender;
         candidates = _candidates;
     }
 
-    // Function to add a new candidate by the contract owner
+    /**
+     * @dev Function to add a new candidate by the contract owner
+     * @param _candidateAddress Address of the new candidate to be added
+     */
     function addCandidate(
         address _candidateAddress
     ) public onlyOwner duplicateNewCandidate(_candidateAddress) {
@@ -72,7 +79,10 @@ contract VotingSystem {
         emit CandidateAdded(_candidateAddress, candidates.length - 1);
     }
 
-    // Function to remove a candidate by the contract owner
+    /**
+     * @dev Function to remove a candidate by the contract owner
+     * @param _candidateIndex Index of the candidate to be removed
+     */
     function removeCandidate(
         uint256 _candidateIndex
     ) public onlyOwner validCandidate(_candidateIndex) {
@@ -82,7 +92,10 @@ contract VotingSystem {
         emit CandidateRemoved(candidateAddress, _candidateIndex);
     }
 
-    // Function for a voter to cast a vote
+    /**
+     * @dev Function for a voter to cast a vote
+     * @param _candidateIndex Index of the candidate being voted for
+     */
     function vote(
         uint256 _candidateIndex
     ) public newVoter validCandidate(_candidateIndex) {
@@ -92,19 +105,30 @@ contract VotingSystem {
         emit Voted(msg.sender, candidates[_candidateIndex]);
     }
 
-    // Function to get the total votes received by a candidate
+    /**
+     * @dev Function to get the total votes received by a candidate
+     * @param _candidateIndex Index of the candidate
+     * @return uint256 Total number of votes received by the candidate
+     */
     function getTotalVotes(
         uint256 _candidateIndex
     ) public view returns (uint256) {
         return votesReceived[candidates[_candidateIndex]];
     }
 
-    // Function to check if a voter has already voted
+    /**
+     * @dev Function to check if a voter has already voted
+     * @param _voter Address of the voter
+     * @return bool Whether the voter has already voted or not
+     */
     function hasVoted(address _voter) public view returns (bool) {
         return voters[_voter];
     }
 
-    // Function to get the list of all candidates
+    /**
+     * @dev Function to get the list of all candidates
+     * @return address[] Array of candidate addresses
+     */
     function getCandidates() public view returns (address[] memory) {
         return candidates;
     }
