@@ -49,6 +49,14 @@ contract VotingSystem {
         _;
     }
 
+    modifier duplicateNewCandidate(address newCandidate) {
+        for (uint i = 0; i < candidates.length; i++) {
+            require(newCandidate != candidates[i], "Candidate already exists");
+        }
+
+        _;
+    }
+
     // Constructor to initialize the contract with candidate addresses
     constructor(address[] memory _candidates) {
         owner = msg.sender;
@@ -56,7 +64,9 @@ contract VotingSystem {
     }
 
     // Function to add a new candidate by the contract owner
-    function addCandidate(address _candidateAddress) public onlyOwner {
+    function addCandidate(
+        address _candidateAddress
+    ) public onlyOwner duplicateNewCandidate(_candidateAddress) {
         candidates.push(_candidateAddress);
 
         emit CandidateAdded(_candidateAddress, candidates.length - 1);
